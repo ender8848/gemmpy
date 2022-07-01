@@ -23,7 +23,7 @@ def sumMatrix2DPyGPU(A_host, B_host, C_host, nx, ny):
 
 if __name__ == '__main__':
 
-    # some basic settings
+    # some basic settings, must init device in python
     torch.cuda.init()
     cuda0 = torch.device('cuda:0')
     if (args.size is None):
@@ -56,4 +56,6 @@ if __name__ == '__main__':
     sumMatrix2DPyGPU(A_dev, B_dev, C_dev, nx, ny)
     duration = time.time() - start
     print(f"GPU matrix addition in calling C costs {duration:.6f} seconds")
+    
+    # free GPU memory
     torch.cuda.reset_accumulated_memory_stats() 
