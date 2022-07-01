@@ -9,7 +9,7 @@ learn and test some CUDA functionalities
 |PyTorch|compatible with CUDA|
 |CUDA|compatible with PyTorch|
 
-A brief summary of installation
+A brief summary of CUDA and PyTorch installation
 
 1. check CUDA version on device using the following command
 
@@ -35,8 +35,7 @@ If CUDA version matches one of the PyTorch requirements, then simply install PyT
 
 3. CUDA installation
 
-If either CUDA is not installed ot has a unmatched version, then go to this [link](https://developer.nvidia.com/cuda-toolkit-archive) to install CUDA. 
-
+If either CUDA is not installed or has an unmatched version, then go to this [link](https://developer.nvidia.com/cuda-toolkit-archive) to install CUDA. 
 
 # test cases
 
