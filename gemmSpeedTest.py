@@ -26,8 +26,8 @@ def gemmGPUPy(A_dev, B_dev, dest_dev, M, N, K, bias_dev = None):
     else:
         bias_c = ctypes.cast(bias_dev.data_ptr(), ctypes.c_void_p)
     
-    lib.gemmGPUPy.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    lib.gemmGPUPy(a_p, b_p, dest_p, M_c, N_c, K_c, datatype)
+    lib.gemmGPUPy.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
+    lib.gemmGPUPy(a_p, b_p, dest_p, M_c, N_c, K_c, datatype, bias_c)
 
 
 if __name__ == '__main__':
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     # test CPU matrix addition time -- 100 loop
     start = time.time()
-    for i in range (1):
+    for i in range (100):
         C_host = A_host @ B_host
     duration = time.time() - start
     print(f"CPU matrix multiplication 100 times in PyTorch costs {duration:.6f} seconds")
@@ -63,10 +63,12 @@ if __name__ == '__main__':
     C_dev = torch.zeros(M, N, dtype=torch.float, device=cuda0)
     
     # test GPU matrix addition time
-    start = time.time()
     ll = ctypes.cdll.LoadLibrary        
     lib = ll('./gemmGPU.so')
-    gemmGPUPy(A_dev, B_dev, C_dev, M, N, K)
+    start = time.time()
+    for i in range(100):
+        gemmGPUPy(A_dev, B_dev, C_dev, M, N, K)
+        # print(C_dev[0][0])
     duration = time.time() - start
     print(f"GPU matrix multiplication 100 times in calling C costs {duration:.6f} seconds")
     # copy c_dev from gpu to c_host in cpu

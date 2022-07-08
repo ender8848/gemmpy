@@ -67,7 +67,6 @@ extern "C" {
 void gemmGPUPy(void* A_dev, void* B_dev, void* dest_dev, int M, int N, int K, int datatype, void* bias_dev = nullptr) {
     switch (datatype) {
         case datatype::FLOAT:
-        printf("flat!\n");
             gemmGPUC<float>(static_cast<float*>(A_dev),
                             static_cast<float*>(B_dev),
                             static_cast<float*>(dest_dev),
