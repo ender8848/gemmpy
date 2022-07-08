@@ -56,3 +56,10 @@ Execute with specified size n, the script will perform a nXn matrix addition on 
 ```
 python MMASpeedTest.py [-o size]
 ```
+
+---
+just a backup
+
+```
+nvcc -O3 -shared -Xcompiler -fPIC gemmGPU.cu -o gemmGPU.so
+```

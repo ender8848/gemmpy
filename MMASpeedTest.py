@@ -12,10 +12,10 @@ args = parser.parse_args()
 def sumMatrix2DPyGPU(A_dev, B_dev, C_dev, nx, ny):
     nx_c = ctypes.c_int(nx)
     ny_c = ctypes.c_int(ny)
-    a_p = ctypes.cast(A_dev.data_ptr(), ctypes.POINTER(ctypes.c_float))
-    b_p = ctypes.cast(B_dev.data_ptr(), ctypes.POINTER(ctypes.c_float))
-    c_p = ctypes.cast(C_dev.data_ptr(), ctypes.POINTER(ctypes.c_float))
-    lib.sumMatrix2DGPU.argtypes = [ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_int, ctypes.c_int]
+    a_p = ctypes.cast(A_dev.data_ptr(), ctypes.c_void_p)
+    b_p = ctypes.cast(B_dev.data_ptr(), ctypes.c_void_p)
+    c_p = ctypes.cast(C_dev.data_ptr(), ctypes.c_void_p)
+    lib.sumMatrix2DGPU.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
     lib.sumMatrix2DGPU(c_p, a_p, b_p, nx_c, ny_c)
 
 

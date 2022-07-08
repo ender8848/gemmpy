@@ -17,7 +17,10 @@ __global__ void sumMatrix2D(float * MatA,float * MatB,float * MatC,int nx,int ny
 }
 
 extern "C" {
-    void sumMatrix2DGPU(float* C_dev, float* A_dev, float* B_dev, int nx, int ny) {
+    void sumMatrix2DGPU(void* C_dev, void* A_dev, void* B_dev, int nx, int ny) {
+        auto A_dev_ = static_cast<float*>(A_dev);
+        auto B_dev_ = static_cast<float*>(B_dev);
+        auto C_dev_ = static_cast<float*>(C_dev);
         double gpuStart = cpuSecond();
         // initDevice(0); // This should be caller's concern
         // 2-d bolck ，32×32
@@ -27,7 +30,7 @@ extern "C" {
 
 
         //将核函数放在线程网格中执行
-        sumMatrix2D<<<grid,block>>>(A_dev, B_dev, C_dev, nx, ny);
+        sumMatrix2D<<<grid,block>>>(A_dev_, B_dev_, C_dev_, nx, ny);
         CHECK(cudaDeviceSynchronize());
         // cudaDeviceReset();
         double gpuTime = cpuSecond() - gpuStart;
