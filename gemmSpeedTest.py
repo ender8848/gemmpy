@@ -52,25 +52,35 @@ if __name__ == '__main__':
 
     # test CPU matrix addition time -- 100 loop
     start = time.time()
-    for i in range (100):
+    for i in range (10):
         C_host = A_host @ B_host
     duration = time.time() - start
-    print(f"CPU matrix multiplication 100 times in PyTorch costs {duration:.6f} seconds")
+    print(f"CPU matrix multiplication 10 times in PyTorch costs {duration:.6f} seconds")
 
     # initialize tensors in GPU
-    A_dev = torch.ones(M, K, dtype=torch.float, device=cuda0)
+    A_dev = torch.ones(M, K, dtype=torch.double, device=cuda0)
     B_dev = torch.ones(K, N, dtype=torch.float, device=cuda0)
     C_dev = torch.zeros(M, N, dtype=torch.float, device=cuda0)
+
+    start = time.time()
+    for i in range (10):
+        C_host = A_dev @ B_dev
+    duration = time.time() - start
+    print(f"GPU matrix multiplication 10 times in PyTorch costs {duration:.6f} seconds")
     
     # test GPU matrix addition time
     ll = ctypes.cdll.LoadLibrary        
     lib = ll('./gemmGPU.so')
+
     start = time.time()
-    for i in range(100):
+    for i in range(10):
+        start_ = time.time()
         gemmGPUPy(A_dev, B_dev, C_dev, M, N, K)
+        duration_ = time.time() - start_
+        print(f"GPU matrix multiplication 1 time costs {duration_:.6f} seconds")
         # print(C_dev[0][0])
     duration = time.time() - start
-    print(f"GPU matrix multiplication 100 times in calling C costs {duration:.6f} seconds")
+    print(f"GPU matrix multiplication 10 times in calling C costs {duration:.6f} seconds")
     # copy c_dev from gpu to c_host in cpu
 
     
