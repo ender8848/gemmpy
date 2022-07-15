@@ -1,29 +1,17 @@
-from ast import In
 import numpy as np
-from customType import Number
 
-Intv_f = np.dtype([('lower', np.float32), ('upper', np.float32)])
+# numpy custom interval type with lower and upper 
+Intv = np.dtype([('lower', np.float64), ('upper', np.float64)])
 
-itv1 = [0., 1.]
-itv2 = [0., -1.]
-itv_m1 = np.array([(0.0, 1.0), (0.0, 1.0)], dtype=Intv_f)
-itv_m2 = np.array([(0.0, 2.0), (0.0, 2.0)], dtype=Intv_f)
+np_intv_1 = np.ones(1, dtype = Intv) # array([(1., 1.)])
+np_intv_2 = np.ones(1, dtype = Intv) # array([(1., 1.)])
 
-
-def __add__(a, b):
-    assert isinstance(a, Intv_f) and isinstance(b, Intv_f)
-    return [a.lower + b.lower, a.upper + b.upper]
+print(np_intv_1 + np_intv_2) 
+# numpy.core._exceptions.UFuncTypeError: ufunc 'add' did not contain a loop with signature matching types
 
 
-# def __mult__(a, b):
-#     assert isinstance(a, np.ndarray) and isinstance(b, np.ndarray)
-#     assert (a.dtype == Intv_f and b.dtype == Intv_f)
-#     assert (a.size > 0 and b.size > 0)
-
-
-
-num_m1 = np.array([0., 0.], dtype = Number)
-num_m2 = np.array([0., -1.], dtype = Number)
-print(num_m1.dtype)
-
-print(num_m1 + num_m2)
+# 现在的问题：
+# Interval class，需要模拟出real number的接口
+# 如何解决一个等号就从real-valued 转化为 Interval
+# 需要有一种直接指定size，就初始化Interval Array的方法，可能得用到
+# 难道尼玛真的得去改numpy的源码？或者加一个源码补丁之类的？这也太逆天了吧
