@@ -1,0 +1,5 @@
+# ignore all pycache file
+__pycache__/
+
+# compiled file
+*.so
