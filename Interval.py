@@ -8,7 +8,7 @@ def print_2d_array(array):
         print()
 
 
-class Interval(object):
+class Interval():
     # constructor
     def __init__(self,*kwargs):
         if (len(kwargs) == 0):

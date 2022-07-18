@@ -84,6 +84,7 @@ def gemmGPUPy(A_host:np.ndarray, B_host:np.ndarray, dest_host:np.ndarray, M, N, 
     
     lib.gemmGPUPy.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_void_p, ctypes.c_bool]
     lib.gemmGPUPy(a_p, b_p, dest_p, M_c, N_c, K_c, datatype, bias_c, is_host_c)
+    print()
 
 def mat_mul(A:np.ndarray, B:np.ndarray, interval = True, gpu = True, lib = None):
     """
@@ -105,7 +106,7 @@ def mat_mul(A:np.ndarray, B:np.ndarray, interval = True, gpu = True, lib = None)
         B_ = cp.array(B)
         return cp.asnumpy(A @ B)
     # interval case
-    dest = np.empty((A.shape[0], B.shape[1]), dtype = Interval)
+    dest = to_interval_array_np(np.zeros((A.shape[0], B.shape[1])))
     gemmGPUPy(A, B, dest, A.shape[0], B.shape[1], A.shape[1], lib)
     return dest
     

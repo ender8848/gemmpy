@@ -51,6 +51,11 @@ def gemm_interval_cpu():
     dest = gemm(A, B, bias, True, False)
     print(dest[0][0])
 
+
+# This test fails because A and B created by this way is actually an np array of objects
+# and each has 48 bytes!
+# if their data is passed directly, then C function will not work!
+# either rewrite a new C func or recreate a data structure and pass to C function
 def gemm_interval_gpu():
     A = to_interval_array_np(np.ones((2,3)))
     B = to_interval_array_np(np.ones((3,2)))

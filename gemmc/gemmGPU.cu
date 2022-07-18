@@ -9,6 +9,7 @@
 #include "../cutlass/util/host_tensor.h"
 #include "Interval.cuh"
 #include "util.cuh"
+#include <iostream>
 
 enum datatype {
     FLOAT = 0,
@@ -99,21 +100,28 @@ void gemmGPUCUsingCPUPtr(T* A_host, T* B_host, T* dest_host, int M, int N, int K
     cudaMemcpy(A_dev, A_host, sizeof(T)*M*K, cudaMemcpyHostToDevice);
     cudaMemcpy(B_dev, B_host, sizeof(T)*K*N, cudaMemcpyHostToDevice);
 
+    std::cout << "111" << std::endl;
     // init dest tensor to 0
     cudaMemset(dest_dev, 0, sizeof(T)*M*N);
+    std::cout << "222" << std::endl;
     if (bias_host != dest_host) cudaMemcpy(bias_dev, bias_host, sizeof(T)*M*N, cudaMemcpyHostToDevice);
+    std::cout << "333" << std::endl;
     
     // delegate to gemmGPUCUsingGPUPtr
     gemmGPUCUsingGPUPtr(A_dev, B_dev, dest_dev, M, N, K, bias_dev);
+    std::cout << "444" << std::endl;
 
     // copy dest tensor back to host tensor
     cudaMemcpy(dest_host, dest_dev, sizeof(T)*M*N, cudaMemcpyDeviceToHost);
+    std::cout << "555" << std::endl;
 
     // free device memory
     cudaFree(A_dev);
     cudaFree(B_dev);
     cudaFree(dest_dev);
+    std::cout << "666" << std::endl;
     if (bias_host != dest_host) cudaFree(bias_dev);
+    std::cout << "777" << std::endl;
 }
 
 
@@ -132,11 +140,8 @@ extern "C" {
 * @param bias: pointer to the memory of bias matrix, can be host or device, default to NULL
 * @param is_host: whether A, B, dest, and bias are host or device, default to true
 */
-void gemmGPUPy(void* A, void* B, void* dest, int M, int N, int K, int datatype, void* bias = nullptr, bool is_host = true) {
-    if (bias == nullptr) {
-        printf("here");
-        bias = dest;
-    }
+void gemmGPUPy(void* A, void* B, void* dest, int M, int N, int K, int datatype, void* bias = NULL, bool is_host = true) {
+    if (bias == nullptr) bias = dest;
     if (is_host && datatype == datatype::FLOAT) {
         gemmGPUCUsingCPUPtr<>((float*)A,(float*)B,(float*)dest,
                               M, N, K,(float*)bias);
@@ -148,6 +153,7 @@ void gemmGPUPy(void* A, void* B, void* dest, int M, int N, int K, int datatype, 
         return;
     }
     if (is_host && datatype == datatype::INTV_FLOAT) {
+        std::cout << "cpu intv float" << std::endl;
         gemmGPUCUsingCPUPtr<>((Interval<float>*)A, (Interval<float>*)B, (Interval<float>*)dest,
                               M, N, K, (Interval<float>*)bias);
         return;
