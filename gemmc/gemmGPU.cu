@@ -9,7 +9,7 @@
 #include "../cutlass/util/host_tensor.h"
 #include "Interval.cuh"
 #include "util.cuh"
-#include <iostream>
+// #include <iostream>
 
 enum datatype {
     FLOAT = 0,
@@ -34,11 +34,11 @@ template<typename T>
 void gemmGPUCUsingGPUPtr(T* A_dev, T* B_dev, T* dest_dev, int M, int N, int K, T* bias_dev) {
     using Gemm = cutlass::gemm::device::Gemm<
             T,                                    // ElementA, namely type of A
-            cutlass::layout::ColumnMajor,         // LayoutA, column major means colum of A is contiguous in memory
+            cutlass::layout::RowMajor,         // LayoutA, column major means colum of A is contiguous in memory
             T,                                    // ElementB
-            cutlass::layout::ColumnMajor,         // LayoutB
+            cutlass::layout::RowMajor,         // LayoutB
             T,                                    // ElementOutput
-            cutlass::layout::ColumnMajor,         // LayoutOutput
+            cutlass::layout::RowMajor,         // LayoutOutput
             T,                                    // ElementAccumulator
             cutlass::arch::OpClassSimt,           // tag indicating Tensor Cores, architecture-dependent
             cutlass::arch::Sm61                   // tag indicating target GPU opcode class, architecture-dependent (61 for GTX 1060)
@@ -48,10 +48,10 @@ void gemmGPUCUsingGPUPtr(T* A_dev, T* B_dev, T* dest_dev, int M, int N, int K, T
 
     T alpha = T(1.);    // Define alpha and beta, this controls dest = alpha * A @ B + beta * bias
     T beta = T(1.);     // use 1 here to get dest = A @ B + bias
-    int lda = M;        // leading dimension of A, namely the number of rows of A
-    int ldb = K;        // leading dimension of B, namely the number of rows of B
-    int ld_dest = M;    // leading dimension of dest, namely the number of rows of dest
-    int ld_bias = M;    // leading dimension of bias, namely the number of rows of bias
+    int lda = K;        // leading dimension of A, namely the number of rows of A
+    int ldb = N;        // leading dimension of B, namely the number of rows of B
+    int ld_dest = N;    // leading dimension of dest, namely the number of rows of dest
+    int ld_bias = N;    // leading dimension of bias, namely the number of rows of bias
 
     status = gemm({
         {M,        N, K},
@@ -100,28 +100,21 @@ void gemmGPUCUsingCPUPtr(T* A_host, T* B_host, T* dest_host, int M, int N, int K
     cudaMemcpy(A_dev, A_host, sizeof(T)*M*K, cudaMemcpyHostToDevice);
     cudaMemcpy(B_dev, B_host, sizeof(T)*K*N, cudaMemcpyHostToDevice);
 
-    std::cout << "111" << std::endl;
     // init dest tensor to 0
     cudaMemset(dest_dev, 0, sizeof(T)*M*N);
-    std::cout << "222" << std::endl;
     if (bias_host != dest_host) cudaMemcpy(bias_dev, bias_host, sizeof(T)*M*N, cudaMemcpyHostToDevice);
-    std::cout << "333" << std::endl;
     
     // delegate to gemmGPUCUsingGPUPtr
     gemmGPUCUsingGPUPtr(A_dev, B_dev, dest_dev, M, N, K, bias_dev);
-    std::cout << "444" << std::endl;
 
     // copy dest tensor back to host tensor
     cudaMemcpy(dest_host, dest_dev, sizeof(T)*M*N, cudaMemcpyDeviceToHost);
-    std::cout << "555" << std::endl;
 
     // free device memory
     cudaFree(A_dev);
     cudaFree(B_dev);
     cudaFree(dest_dev);
-    std::cout << "666" << std::endl;
     if (bias_host != dest_host) cudaFree(bias_dev);
-    std::cout << "777" << std::endl;
 }
 
 
@@ -153,7 +146,6 @@ void gemmGPUPy(void* A, void* B, void* dest, int M, int N, int K, int datatype, 
         return;
     }
     if (is_host && datatype == datatype::INTV_FLOAT) {
-        std::cout << "cpu intv float" << std::endl;
         gemmGPUCUsingCPUPtr<>((Interval<float>*)A, (Interval<float>*)B, (Interval<float>*)dest,
                               M, N, K, (Interval<float>*)bias);
         return;

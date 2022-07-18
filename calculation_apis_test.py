@@ -4,7 +4,7 @@ from Interval import print_2d_array
 
 def can_convert_real_numbered_array_to_Interval_array():
     a = np.ones((3,4))
-    b = to_interval_array_np(a)
+    b = np_array_float2interval(a)
     assert(b.dtype == object)
     assert(b.shape == a.shape)
     assert(b[0,0] == Interval(1,1))
@@ -43,9 +43,9 @@ def gemm_non_interval_gpu():
     assert(dest[0][0] == 4)
 
 def gemm_interval_cpu():
-    A = to_interval_array_np(np.ones((2,3)))
-    B = to_interval_array_np(np.ones((3,2)))
-    bias = to_interval_array_np(np.ones((2,2)))
+    A = np_array_float2interval(np.ones((2,3)))
+    B = np_array_float2interval(np.ones((3,2)))
+    bias = np_array_float2interval(np.ones((2,2)))
     dest = mat_mul(A, B, True, False)
     print(dest[0][0])
     dest = gemm(A, B, bias, True, False)
@@ -58,14 +58,16 @@ def gemm_interval_cpu():
 # either rewrite a new C func or recreate a data structure and pass to C function
 # # But it seems not teh reason as float size is 24 ...
 def gemm_interval_gpu():
-    A = to_interval_array_np(np.ones((2,3)))
-    B = to_interval_array_np(np.ones((3,2)))
-    bias = to_interval_array_np(np.ones((2,2)))
+    A = np_array_float2pseudo_interval(np.ones((2,3)))
+    B = np_array_float2pseudo_interval(np.ones((3,2)))
+    bias = np_array_float2pseudo_interval(np.ones((2,2)))
     ll = ctypes.cdll.LoadLibrary
     lib = ll('./gemmc/gemmGPU.so')
     dest = mat_mul(A, B, True, True, lib)
+    dest = np_array_pseudo_interval2interval(dest)
     print(dest[0][0])
     dest = gemm(A, B, bias, True, True, lib)
+    dest = np_array_pseudo_interval2interval(dest)
     print(dest[0][0])
 
 

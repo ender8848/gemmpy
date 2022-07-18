@@ -3,7 +3,7 @@ from Interval import Interval
 import cupy as cp
 import ctypes
 
-def to_interval_array_np(arr:np.ndarray):
+def np_array_float2interval(arr:np.ndarray):
     """
     converts an real-valued array to an interval array
     args: 
@@ -16,6 +16,35 @@ def to_interval_array_np(arr:np.ndarray):
     for i in range(arr.shape[0]):
         for j in range(arr.shape[1]):
             result[i,j] = Interval(arr[i,j], arr[i,j])
+    return result
+
+def np_array_float2pseudo_interval(arr:np.ndarray):
+    """
+    converts an real-valued array to an peudo interval array which uses continuous memory view to mimic an Interval
+    args: 
+        arr: array-like
+    returns:
+        an pseudo interval numpy array converting from arr
+    """
+    result = np.zeros((arr.shape[0], arr.shape[1]*2),dtype=np.float32)
+    for i in range(arr.shape[0]):
+        for j in range(arr.shape[1]):
+            result[i,2*j] = arr[i][j]
+            result[i,2*j+1] = arr[i][j]
+    return result
+
+def np_array_pseudo_interval2interval(arr:np.ndarray):
+    """
+    converts an peudo interval array to an interval array
+    args: 
+        arr: array-like
+    returns:
+        an interval numpy array converting from arr
+    """
+    result = np.empty((arr.shape[0], arr.shape[1]//2),dtype=Interval)
+    for i in range(arr.shape[0]):
+        for j in range(arr.shape[1]//2):
+            result[i,j] = Interval(arr[i,2*j], arr[i,2*j+1])
     return result
 
 def get_upper(arr:np.ndarray):
@@ -84,19 +113,18 @@ def gemmGPUPy(A_host:np.ndarray, B_host:np.ndarray, dest_host:np.ndarray, M, N, 
     
     lib.gemmGPUPy.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_void_p, ctypes.c_bool]
     lib.gemmGPUPy(a_p, b_p, dest_p, M_c, N_c, K_c, datatype, bias_c, is_host_c)
-    print()
 
 def mat_mul(A:np.ndarray, B:np.ndarray, interval = True, gpu = True, lib = None):
     """
     perform matrix multiplication A @ B
     args:
-        A: lhs of matrix multiplication
-        B: rhs of matrix multiplication
+        A: lhs of matrix multiplication, use 2 floats to represent an interval, NOT AN INTERVAL ARRAY, but float array because it has continuous memory view
+        B: rhs of matrix multiplication, use 2 floats to represent an interval, NOT AN INTERVAL ARRAY, but float array because it has continuous memory view
         interval: whether to use sound calculation
         gpu: whether to run on GPU
         lib: dynamic linking lib
     returns:
-        new np array A @ B
+        new np array A @ B, use 2 floats to represent an interval, NOT AN INTERVAL ARRAY, but float array because it has continuous memory view
     """
     if not gpu:
         return A @ B
@@ -106,8 +134,8 @@ def mat_mul(A:np.ndarray, B:np.ndarray, interval = True, gpu = True, lib = None)
         B_ = cp.array(B)
         return cp.asnumpy(A @ B)
     # interval case
-    dest = to_interval_array_np(np.zeros((A.shape[0], B.shape[1])))
-    gemmGPUPy(A, B, dest, A.shape[0], B.shape[1], A.shape[1], lib)
+    dest = np_array_float2pseudo_interval(np.zeros((A.shape[0], int(B.shape[1]/2))))
+    gemmGPUPy(A, B, dest, A.shape[0], int(B.shape[1]/2), int(A.shape[1]/2), lib)
     return dest
     
 
@@ -115,14 +143,14 @@ def gemm(A:np.ndarray, B:np.ndarray, bias:np.ndarray, interval = True, gpu = Tru
     """
     performs gemm dest = A @ B + bias and return dest
     args:
-        A: lhs of matrix multiplication
-        B: rhs of matrix multiplication
+        A: lhs of matrix multiplication, use 2 floats to represent an interval, NOT AN INTERVAL ARRAY, but float array because it has continuous memory view
+        B: rhs of matrix multiplication, use 2 floats to represent an interval, NOT AN INTERVAL ARRAY, but float array because it has continuous memory view
         bias: bias matrix 
         interval: whether to use sound calculation
         gpu: whether to run on GPU
         lib: dynamic linking lib
     returns:
-        dest of matrix multiplication
+        dest of matrix multiplication, use 2 floats to represent an interval, NOT AN INTERVAL ARRAY, but float array because it has continuous memory view
     """
 
     if bias is None:
@@ -135,6 +163,6 @@ def gemm(A:np.ndarray, B:np.ndarray, bias:np.ndarray, interval = True, gpu = Tru
         B_ = cp.array(B)
         return cp.asnumpy(A @ B) + bias
     # interval case
-    dest = np.empty((A.shape[0], B.shape[1]), dtype = Interval)
-    gemmGPUPy(A, B, dest, A.shape[0], B.shape[1], A.shape[1], lib)
+    dest = np_array_float2pseudo_interval(np.zeros((A.shape[0], int(B.shape[1]/2))))
+    gemmGPUPy(A, B, dest, A.shape[0], int(B.shape[1]/2), int(A.shape[1]/2), lib, bias)
     return dest
