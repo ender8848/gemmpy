@@ -23,7 +23,51 @@ def can_convert_Interval_array_to_lower():
     assert(b.shape == a.shape)
     assert(b[1,1] == 1)
 
+def gemm_non_interval_cpu():
+    A = np.ones((2,3))
+    B = np.ones((3,2))
+    bias = np.ones((2,2))
+    dest = mat_mul(A, B, False, False)
+    assert(dest[0][0] == 3)
+    dest = gemm(A, B, bias,False, False)
+    assert(dest[0][0] == 4)
+
+
+def gemm_non_interval_gpu():
+    A = np.ones((2,3))
+    B = np.ones((3,2))
+    bias = np.ones((2,2))
+    dest = mat_mul(A, B, False, True)
+    assert(dest[0][0] == 3)
+    dest = gemm(A, B, bias,False, True)
+    assert(dest[0][0] == 4)
+
+def gemm_interval_cpu():
+    A = to_interval_array_np(np.ones((2,3)))
+    B = to_interval_array_np(np.ones((3,2)))
+    bias = to_interval_array_np(np.ones((2,2)))
+    dest = mat_mul(A, B, True, False)
+    print(dest[0][0])
+    dest = gemm(A, B, bias, True, False)
+    print(dest[0][0])
+
+def gemm_interval_gpu():
+    A = to_interval_array_np(np.ones((2,3)))
+    B = to_interval_array_np(np.ones((3,2)))
+    bias = to_interval_array_np(np.ones((2,2)))
+    ll = ctypes.cdll.LoadLibrary
+    lib = ll('./gemmc/gemmGPU.so')
+    dest = mat_mul(A, B, True, True, lib)
+    print(dest[0][0])
+    dest = gemm(A, B, bias, True, True, lib)
+    print(dest[0][0])
+
+
 if __name__ == '__main__':
     can_convert_real_numbered_array_to_Interval_array()
     can_convert_Interval_array_to_upper()
     can_convert_Interval_array_to_lower()
+    gemm_non_interval_cpu()
+    gemm_non_interval_gpu()
+    gemm_interval_cpu()
+    gemm_interval_gpu()

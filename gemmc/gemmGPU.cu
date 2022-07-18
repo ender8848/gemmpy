@@ -133,7 +133,10 @@ extern "C" {
 * @param is_host: whether A, B, dest, and bias are host or device, default to true
 */
 void gemmGPUPy(void* A, void* B, void* dest, int M, int N, int K, int datatype, void* bias = nullptr, bool is_host = true) {
-    if (bias == nullptr) bias = dest;
+    if (bias == nullptr) {
+        printf("here");
+        bias = dest;
+    }
     if (is_host && datatype == datatype::FLOAT) {
         gemmGPUCUsingCPUPtr<>((float*)A,(float*)B,(float*)dest,
                               M, N, K,(float*)bias);
