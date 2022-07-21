@@ -23,4 +23,12 @@ print()
 
 
 ## cp test
+import cupy as cp
+A = cp.eye(5)
+B = cp.ones(5)
+C = cp.zeros(5)
+D = A @ B + C
+print(D)
+# convert to np array
+E = cp.asnumpy(D)
 
