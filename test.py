@@ -1,6 +1,8 @@
 import Interval
 import numpy as np
 from sys import getsizeof
+
+# size test
 i = Interval.Interval(1, 2) 
 j = float(1)
 # get size of i
@@ -18,3 +20,7 @@ print(getsizeof(c))
 
 d = np.eye(4, dtype=np.float32)
 print()
+
+
+## cp test
+
