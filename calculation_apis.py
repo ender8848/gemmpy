@@ -12,35 +12,44 @@ def np_array_float2interval(arr:np.ndarray):
         an numpy array converting from arr
     
     """
+    if not isinstance(arr, np.ndarray):
+        raise TypeError("arr must be numpy array")
     result = np.empty((arr.shape),dtype=Interval)
     for i in range(arr.shape[0]):
         for j in range(arr.shape[1]):
             result[i,j] = Interval(arr[i,j], arr[i,j])
     return result
 
-def np_array_float2pseudo_interval(arr:np.ndarray):
+def array_float2pinterval(arr):
     """
     converts an real-valued array to an peudo interval array which uses continuous memory view to mimic an Interval
     args: 
-        arr: array-like
+        arr: array-like, can be numpy array or cupy array
     returns:
-        an pseudo interval numpy array converting from arr
+        an pseudo interval np or cp float array converting from arr
     """
-    result = np.zeros((arr.shape[0], arr.shape[1]*2),dtype=np.float32)
+    if isinstance(arr, np.ndarray):
+        result = np.zeros((arr.shape[0], arr.shape[1]*2),dtype=np.float32)
+    elif isinstance(arr, cp.ndarray):
+        result = cp.zeros((arr.shape[0], arr.shape[1]*2),dtype=cp.float32)
+    else:
+        raise TypeError("arr must be numpy array or cupy array")
     for i in range(arr.shape[0]):
         for j in range(arr.shape[1]):
             result[i,2*j] = arr[i][j]
             result[i,2*j+1] = arr[i][j]
     return result
 
-def np_array_pseudo_interval2interval(arr:np.ndarray):
+def np_array_pinterval2interval(arr):
     """
     converts an peudo interval array to an interval array
     args: 
-        arr: array-like
+        arr: array-like pesudo interval
     returns:
         an interval numpy array converting from arr
     """
+    if not isinstance(arr, np.ndarray):
+        raise TypeError("arr must be numpy array")
     result = np.empty((arr.shape[0], arr.shape[1]//2),dtype=Interval)
     for i in range(arr.shape[0]):
         for j in range(arr.shape[1]//2):
@@ -49,36 +58,62 @@ def np_array_pseudo_interval2interval(arr:np.ndarray):
 
 def get_upper(arr:np.ndarray):
     """
-    converts an interval array to corresponding upper-value float array
+    converts an interval numpy array or pseudo interval array 
+    to corresponding upper-value float array
     args: 
-        arr: Interval array
+        arr: Interval array or pseudo interval array
     returns:
         upper value float array
     
     """
-    result = np.empty((arr.shape), dtype = np.float32)
+    if isinstance(arr, np.ndarray) and arr.dtype != np.float32:
+        result = np.empty((arr.shape), dtype = np.float32)
+        for i in range(arr.shape[0]):
+            for j in range(arr.shape[1]):
+                result[i,j] = arr[i,j].upper
+        return result
+    if isinstance(arr, np.ndarray):
+        result = np.empty((arr.shape[0], arr.shape[1]//2), dtype = np.float32)
+    elif isinstance(arr, cp.ndarray):
+        result = cp.empty((arr.shape[0], arr.shape[1]//2), dtype = cp.float32)
+    else:
+        raise TypeError("arr must be numpy array or cupy array")
     for i in range(arr.shape[0]):
-        for j in range(arr.shape[1]):
-            result[i,j] = arr[i,j].upper
+        for j in range(arr.shape[1]//2):
+            result[i,j] = arr[i,2*j+1]
     return result
 
 
 def get_lower(arr:np.ndarray):
     """
-    converts an interval array to corresponding lower-value float array
+    converts an interval numpy array or pseudo interval array 
+    to corresponding lower-value float array
     args: 
-        arr: Interval array
+        arr: Interval array or pseudo interval array
     returns:
         lower value float array
     
     """
-    result = np.empty((arr.shape), dtype = np.float32)
+    if isinstance(arr, np.ndarray) and arr.dtype != np.float32:
+        result = np.empty((arr.shape), dtype = np.float32)
+        for i in range(arr.shape[0]):
+            for j in range(arr.shape[1]):
+                result[i,j] = arr[i,j].lower
+        return result
+    if isinstance(arr, np.ndarray):
+        result = np.empty((arr.shape[0], arr.shape[1]//2), dtype = np.float32)
+    elif isinstance(arr, cp.ndarray):
+        result = cp.empty((arr.shape[0], arr.shape[1]//2), dtype = cp.float32)
+    else:
+        raise TypeError("arr must be numpy array or cupy array")
     for i in range(arr.shape[0]):
-        for j in range(arr.shape[1]):
-            result[i,j] = arr[i,j].lower
+        for j in range(arr.shape[1]//2):
+            result[i,j] = arr[i,2*j]
     return result
+    
 
 
+# not completely implemented, currently only compatible with CPU numpy array
 def add(A:np.ndarray, B:np.ndarray):
     """
     perform matrix addition, addition defaults to CPU implementation because it is relatively cheap to compute
@@ -134,7 +169,7 @@ def mat_mul(A:np.ndarray, B:np.ndarray, interval = True, gpu = True, lib = None)
         B_ = cp.array(B)
         return cp.asnumpy(A @ B)
     # interval case
-    dest = np_array_float2pseudo_interval(np.zeros((A.shape[0], int(B.shape[1]/2))))
+    dest = array_float2pinterval(np.zeros((A.shape[0], int(B.shape[1]/2))))
     gemmGPUPy(A, B, dest, A.shape[0], int(B.shape[1]/2), int(A.shape[1]/2), lib)
     return dest
     
@@ -163,6 +198,6 @@ def gemm(A:np.ndarray, B:np.ndarray, bias:np.ndarray, interval = True, gpu = Tru
         B_ = cp.array(B)
         return cp.asnumpy(A @ B) + bias
     # interval case
-    dest = np_array_float2pseudo_interval(np.zeros((A.shape[0], int(B.shape[1]/2))))
+    dest = array_float2pinterval(np.zeros((A.shape[0], int(B.shape[1]/2))))
     gemmGPUPy(A, B, dest, A.shape[0], int(B.shape[1]/2), int(A.shape[1]/2), lib, bias)
     return dest

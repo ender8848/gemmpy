@@ -1,27 +1,83 @@
 import numpy as np
+import cupy as cp
 from calculation_apis import *
 from Interval import print_2d_array
 
-def can_convert_real_numbered_array_to_Interval_array():
+def can_convert_real_numbered_np_array_to_Interval_np_array():
+    """
+    test function np_array_float2interval
+    """
     a = np.ones((3,4))
     b = np_array_float2interval(a)
     assert(b.dtype == object)
     assert(b.shape == a.shape)
     assert(b[0,0] == Interval(1,1))
 
-def can_convert_Interval_array_to_upper():
+def can_convert_float_array_to_pesudo_interval_array():
+    """
+    test function array_float2pinterval
+    """
+    # cpu case
+    a = np.eye(2)
+    b = array_float2pinterval(a)
+    assert(b.dtype == np.float32)
+    assert(b.shape[0] == a.shape[0])
+    assert(b.shape[1] == 2*a.shape[1])
+    assert(b[0,0] == 1 and b[0,1] == 1 and b[0,2] == 0)
+    # gpu case
+    c = cp.eye(2)
+    d = array_float2pinterval(c)
+    assert(d.dtype == cp.float32)
+    assert(d.shape[0] == c.shape[0])
+    assert(d.shape[1] == 2*c.shape[1])
+    assert(d[0,0] == 1 and d[0,1] == 1 and d[0,2] == 0)
+
+def can_convert_numpy_pesudo_interval_array_to_Interval_array():
+    """
+    test function array_pinterval2interval
+    """
+    a = np.array([[1.0,1.1],[2.0,2.1]], dtype = np.float32)
+    b = np_array_pinterval2interval(a)
+    assert(b.dtype == object)
+    assert(b.shape[0] == a.shape[0])
+    assert(b.shape[1] == a.shape[1]//2)
+    assert(a[0,0] == b[0,0].lower and a[0,1] == b[0,0].upper)
+
+def can_convert_numpy_Interval_array_to_upper():
+    """
+    test function get_upper
+    """
+    # numpy interval case
     a = np.array([[Interval(1,1), Interval(1,2)], [Interval(1,3), Interval(1,4)]])
     b = get_upper(a)
     assert(b.dtype == np.float32)
     assert(b.shape == a.shape)
     assert(b[1,1] == 4)
+    # numpy pesudo interval case
+    c = np.array([[1.0,1.1],[2.0,2.1]], dtype = np.float32)
+    d = get_upper(c)
+    assert(d.dtype == np.float32)
+    assert(d.shape[0] == c.shape[0])
+    assert(d.shape[1] == c.shape[1]//2)
+    assert(c[0,1] == d[0,0] and c[1,1] == d[1,0])
 
-def can_convert_Interval_array_to_lower():
+def can_convert_numpy_Interval_array_to_lower():
+    """
+    test function get_lower
+    """
+    # numpy interval case
     a = np.array([[Interval(1,1), Interval(1,2)], [Interval(1,3), Interval(1,4)]])
     b = get_lower(a)
     assert(b.dtype == np.float32)
     assert(b.shape == a.shape)
     assert(b[1,1] == 1)
+    # numpy pesudo interval case
+    c = np.array([[1.0,1.1],[2.0,2.1]], dtype = np.float32)
+    d = get_lower(c)
+    assert(d.dtype == np.float32)
+    assert(d.shape[0] == c.shape[0])
+    assert(d.shape[1] == c.shape[1]//2)
+    assert(c[0,0] == d[0,0] and c[1,0] == d[1,0])
 
 def gemm_non_interval_cpu():
     A = np.ones((2,3))
@@ -58,24 +114,21 @@ def gemm_interval_cpu():
 # either rewrite a new C func or recreate a data structure and pass to C function
 # # But it seems not teh reason as float size is 24 ...
 def gemm_interval_gpu():
-    A = np_array_float2pseudo_interval(np.ones((2,3)))
-    B = np_array_float2pseudo_interval(np.ones((3,2)))
-    bias = np_array_float2pseudo_interval(np.ones((2,2)))
+    A = array_float2pinterval(np.ones((2,3)))
+    B = array_float2pinterval(np.ones((3,2)))
+    bias = array_float2pinterval(np.ones((2,2)))
     ll = ctypes.cdll.LoadLibrary
     lib = ll('./gemmc/gemmGPU.so')
     dest = mat_mul(A, B, True, True, lib)
-    dest = np_array_pseudo_interval2interval(dest)
+    dest = np_array_pinterval2interval(dest)
     print(dest[0][0])
     dest = gemm(A, B, bias, True, True, lib)
-    dest = np_array_pseudo_interval2interval(dest)
+    dest = np_array_pinterval2interval(dest)
     print(dest[0][0])
 
 
 if __name__ == '__main__':
-    can_convert_real_numbered_array_to_Interval_array()
-    can_convert_Interval_array_to_upper()
-    can_convert_Interval_array_to_lower()
-    gemm_non_interval_cpu()
-    gemm_non_interval_gpu()
-    gemm_interval_cpu()
-    gemm_interval_gpu()
+    can_convert_real_numbered_np_array_to_Interval_np_array()
+    can_convert_float_array_to_pesudo_interval_array()
+    can_convert_numpy_pesudo_interval_array_to_Interval_array()
+    can_convert_numpy_Interval_array_to_upper()
