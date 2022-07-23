@@ -19,14 +19,14 @@ def can_convert_float_array_to_pesudo_interval_array():
     """
     # cpu case
     a = np.eye(2)
-    b = array_float2pinterval(a)
+    b = torch_array_float2pinterval(a)
     assert(b.dtype == np.float32)
     assert(b.shape[0] == a.shape[0])
     assert(b.shape[1] == 2*a.shape[1])
     assert(b[0,0] == 1 and b[0,1] == 1 and b[0,2] == 0)
     # gpu case
     c = cp.eye(2)
-    d = array_float2pinterval(c)
+    d = torch_array_float2pinterval(c)
     assert(d.dtype == cp.float32)
     assert(d.shape[0] == c.shape[0])
     assert(d.shape[1] == 2*c.shape[1])
@@ -114,9 +114,9 @@ def gemm_interval_cpu():
 # either rewrite a new C func or recreate a data structure and pass to C function
 # # But it seems not teh reason as float size is 24 ...
 def gemm_interval_gpu():
-    A = array_float2pinterval(np.ones((2,3)))
-    B = array_float2pinterval(np.ones((3,2)))
-    bias = array_float2pinterval(np.ones((2,2)))
+    A = torch_array_float2pinterval(np.ones((2,3)))
+    B = torch_array_float2pinterval(np.ones((3,2)))
+    bias = torch_array_float2pinterval(np.ones((2,2)))
     ll = ctypes.cdll.LoadLibrary
     lib = ll('./gemmc/gemmGPU.so')
     dest = mat_mul(A, B, True, True, lib)
