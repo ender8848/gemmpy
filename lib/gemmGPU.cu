@@ -9,14 +9,7 @@
 #include "../cutlass/util/host_tensor.h"
 #include "Interval.cuh"
 #include "util.cuh"
-// #include <iostream>
-
-enum datatype {
-    FLOAT = 0,
-    DOUBLE = 1,
-    INTV_FLOAT = 2,
-    INTV_DOUBLE = 3
-};
+#include "datatype.cuh"
 
 /*
  * C interface to do gemm on GPU
@@ -48,10 +41,10 @@ void gemmGPUCUsingGPUPtr(T* A_dev, T* B_dev, T* dest_dev, int M, int N, int K, T
 
     T alpha = T(1.);    // Define alpha and beta, this controls dest = alpha * A @ B + beta * bias
     T beta = T(1.);     // use 1 here to get dest = A @ B + bias
-    int lda = K;        // leading dimension of A, namely the number of rows of A
-    int ldb = N;        // leading dimension of B, namely the number of rows of B
-    int ld_dest = N;    // leading dimension of dest, namely the number of rows of dest
-    int ld_bias = N;    // leading dimension of bias, namely the number of rows of bias
+    int lda = K;        // leading dimension of A, namely the number of cols of A
+    int ldb = N;        // leading dimension of B, namely the number of cols of B
+    int ld_dest = N;    // leading dimension of dest, namely the number of cols of dest
+    int ld_bias = N;    // leading dimension of bias, namely the number of cols of bias
 
     status = gemm({
         {M,        N, K},
@@ -133,7 +126,7 @@ extern "C" {
 * @param bias: pointer to the memory of bias matrix, can be host or device, default to NULL
 * @param is_host: whether A, B, dest, and bias are host or device, default to true
 */
-void gemmGPUPy(void* A, void* B, void* dest, int M, int N, int K, int datatype, void* bias = NULL, bool is_host = true) {
+void gemmGPUPy(void* A, void* B, void* dest, int M, int N, int K, int datatype, void* bias = nullptr, bool is_host = true) {
     if (bias == nullptr) bias = dest;
     if (is_host && datatype == datatype::FLOAT) {
         gemmGPUCUsingCPUPtr<>((float*)A,(float*)B,(float*)dest,
