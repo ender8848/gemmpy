@@ -183,7 +183,7 @@ def mat_mul(A, B, interval:bool):
         return A @ B
     # GPU and interval case
     dest = torch.zeros((A.shape[0], B.shape[1]), dtype = torch.float32, device='cuda') # try replace zero with empty
-    gemmGPUPy(dest, A, B, A.shape[0], int(B.shape[1]//2), B.shape[0])
+    gemmGPUPy(dest, A, B, A.shape[0], B.shape[1]//2, B.shape[0])
     return dest
     
 
@@ -207,5 +207,5 @@ def gemm(A, B, bias, interval:bool):
         return A @ B + bias
     # interval case
     dest = torch.zeros((A.shape[0], B.shape[1]), dtype=torch.float32, device='cuda')
-    gemmGPUPy(dest, A, B, A.shape[0], int(B.shape[1]/2), B.shape[0],bias)
+    gemmGPUPy(dest, A, B, A.shape[0], B.shape[1]//2, B.shape[0],bias)
     return dest
