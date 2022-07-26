@@ -77,6 +77,9 @@ def can_convert_torch_pseudo_interval_array_to_lower():
 
 
 def add_test():
+    """
+    test add api for all 4 cases
+    """
     # numpy float
     A = np.array([[1,2],[3,4],[5,6]], dtype = np.float32)
     B = np.ones((3,2), dtype = np.float32)
@@ -101,6 +104,9 @@ def add_test():
     
 
 def mat_mul_test():
+    """
+    test mat_mul api for all 4 cases
+    """
     # numpy float
     A = np.array([[1,2,3],[4,5,6]], dtype = np.float32)
     B = np.ones((3,2), dtype = np.float32)
@@ -126,6 +132,9 @@ def mat_mul_test():
 
 
 def gemm_test():
+    """
+    test gemm api for all 4 cases
+    """
     # numpy float
     A = np.array([[1,2,3],[4,5,6]], dtype = np.float32)
     B = np.ones((3,2), dtype = np.float32)

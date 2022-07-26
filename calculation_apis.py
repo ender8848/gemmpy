@@ -18,7 +18,6 @@ def np_array_float2interval(arr:np.ndarray):
         arr: numpy array
     returns:
         an numpy array converted from arr
-    
     """
     if not isinstance(arr, np.ndarray):
         raise TypeError("arr must be numpy array")
