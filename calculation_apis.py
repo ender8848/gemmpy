@@ -206,6 +206,6 @@ def gemm(A, B, bias, interval:bool):
     if not interval:
         return A @ B + bias
     # interval case
-    dest = torch_array_float2pinterval(np.zeros((A.shape[0], int(B.shape[1]//2))))
-    gemmGPUPy(A, B, dest, A.shape[0], int(B.shape[1]/2), int(A.shape[1]/2),bias)
+    dest = torch.zeros((A.shape[0], B.shape[1]), dtype=torch.float32, device='cuda')
+    gemmGPUPy(dest, A, B, A.shape[0], int(B.shape[1]/2), B.shape[0],bias)
     return dest

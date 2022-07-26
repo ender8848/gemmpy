@@ -130,25 +130,28 @@ def gemm_test():
     A = np.array([[1,2,3],[4,5,6]], dtype = np.float32)
     B = np.ones((3,2), dtype = np.float32)
     bias = np.ones((2,2), dtype = np.float32)
-    res = mat_mul(A, B, bias, False)
+    res = gemm(A, B, bias, False)
     assert(np.array_equal(res, np.array([[7,7],[16,16]], dtype = np.float32)))
-    # # torch float
-    # A = torch.tensor([[1,2,3],[4,5,6]], dtype = torch.float32, device='cuda')
-    # B = torch.ones((3,2), dtype = torch.float32, device='cuda')
-    # res = mat_mul(A, B, False)
-    # assert(torch.equal(res, torch.tensor([[6,6],[15,15]], dtype = torch.float32, device='cuda')))
-    # # numpy interval 
-    # A = np.array([[Interval(1,2), Interval(-2,3)]], dtype= Interval)
-    # B = np.array([[Interval(-3,4)], [Interval(5,6)]], dtype= Interval)
-    # res = mat_mul(A, B, True) # should be around (-18,26)
-    # assert(res.dtype == object)
-    # assert(res[0][0].lower <= -18 and res[0][0].upper >= 26)
-    # # torch interval
-    # A = torch.tensor([[1,2,-2,3]], dtype= torch.float32, device = 'cuda')
-    # B = torch.tensor([[-3,4], [5,6]], dtype= torch.float32, device='cuda')
-    # res = mat_mul(A, B, True) # should be around (-18,26)
-    # assert(res.dtype==torch.float32)
-    # assert(res[0][0] <= -18 and res[0][1] >= 26)
+    # torch float
+    A = torch.tensor([[1,2,3],[4,5,6]], dtype = torch.float32, device='cuda')
+    B = torch.ones((3,2), dtype = torch.float32, device='cuda')
+    bias = torch.ones((2,2), dtype = torch.float32, device='cuda')
+    res = gemm(A, B, bias, False)
+    assert(torch.equal(res, torch.tensor([[7,7],[16,16]], dtype = torch.float32, device='cuda')))
+    # numpy interval 
+    A = np.array([[Interval(1,2), Interval(-2,3)]], dtype= Interval)
+    B = np.array([[Interval(-3,4)], [Interval(5,6)]], dtype= Interval)
+    bias = np.array([[Interval(-1,1)]], dtype= Interval)
+    res = gemm(A, B, bias, True) # should be around (-19,27)
+    assert(res.dtype == object)
+    assert(res[0][0].lower <= -19 and res[0][0].upper >= 27)
+    # torch interval
+    A = torch.tensor([[1,2,-2,3]], dtype= torch.float32, device = 'cuda')
+    B = torch.tensor([[-3,4], [5,6]], dtype= torch.float32, device='cuda')
+    bias = torch.tensor([[-1,1]], dtype= torch.float32, device='cuda')
+    res = gemm(A, B, bias, True) # should be around (-19,27)
+    assert(res.dtype==torch.float32)
+    assert(res[0][0] <= -19 and res[0][1] >= 27)
 
 
 
@@ -160,3 +163,4 @@ if __name__ == '__main__':
     can_convert_torch_pseudo_interval_array_to_upper()
     add_test()
     mat_mul_test()
+    gemm_test()
