@@ -3,6 +3,8 @@ import torch
 from calculation_apis import *
 from Interval import print_2d_array
 from math import nextafter, inf
+import time
+import csv
 
 def can_convert_real_numbered_np_array_to_Interval_np_array():
     """
@@ -163,6 +165,55 @@ def gemm_test():
     assert(res[0][0] <= -19 and res[0][1] >= 27)
 
 
+def gemm_calculation_speed_test():
+    """
+    test gemm calculation speed for all 4 cases under different matrix size
+    result is written to a local csv file
+    """
+    header = ["matrix_size", "numpy_float(s)", "torch_float(s)", "numpy_interval(s)", "torch_interval(s)"]
+    all_content = []
+    for i in range(20, 201):
+        row = []
+        row.append(i)
+        # numpy float
+        A_np_float = np.random.rand(i,i)
+        B_np_float = np.random.rand(i,i)
+        bias_np_float = np.random.rand(i,i)
+        start = time.time()
+        res = gemm(A_np_float,B_np_float,bias_np_float,False)
+        duration = time.time() - start
+        row.append(f"{duration:.6f}")
+        # torch float
+        A_torch_float = torch.tensor(A_np_float, dtype=torch.float32, device='cuda')
+        B_torch_float = torch.tensor(B_np_float, dtype=torch.float32, device='cuda')
+        bias_torch_float = torch.tensor(bias_np_float, dtype=torch.float32, device='cuda')
+        start = time.time()
+        res = gemm(A_torch_float, B_torch_float, bias_torch_float,False)
+        duration = time.time() - start
+        row.append(f"{duration:.6f}")
+        # numpy interval
+        A_np_interval = np_array_float2interval(A_np_float)
+        B_np_interval = np_array_float2interval(B_np_float)
+        bias_np_interval = np_array_float2interval(bias_np_float)
+        start = time.time()
+        res = gemm(A_np_interval,B_np_interval,bias_np_interval,True)
+        duration = time.time() - start
+        row.append(f"{duration:.6f}")
+        # torch interval
+        A_torch_float = torch.tensor(np.random.rand(i,2*i), dtype=torch.float32, device='cuda')
+        B_torch_float = torch.tensor(np.random.rand(i,2*i), dtype=torch.float32, device='cuda')
+        bias_torch_float = torch.tensor(np.random.rand(i,2*i), dtype=torch.float32, device='cuda')
+        start = time.time()
+        res = gemm(A_torch_float, B_torch_float, bias_torch_float,True)
+        duration = time.time() - start
+        row.append(f"{duration:.6f}")
+        all_content.append(row)
+
+    with open("gemm_calculation_speed_test.csv", "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+        writer.writerows(all_content)
+
 
 if __name__ == '__main__':
     can_convert_real_numbered_np_array_to_Interval_np_array()
@@ -173,3 +224,4 @@ if __name__ == '__main__':
     add_test()
     mat_mul_test()
     gemm_test()
+    gemm_calculation_speed_test()
