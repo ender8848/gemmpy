@@ -9,13 +9,7 @@
 #include <stdio.h>
 #include "util.cuh"
 #include "Interval.cuh"
-
-enum datatype {
-    FLOAT = 0,
-    DOUBLE = 1,
-    INTV_FLOAT = 2,
-    INTV_DOUBLE = 3
-};
+#include "datatype.cuh"
 
 
 // kernel function
