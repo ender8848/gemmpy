@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from calculation_apis import *
 from Interval import print_2d_array
-
+from math import nextafter, inf
 
 def can_convert_real_numbered_np_array_to_Interval_np_array():
     """
@@ -77,17 +77,27 @@ def can_convert_torch_pseudo_interval_array_to_lower():
 
 
 def add_test():
-    # numpy float case
-    A = np.array([[1,2],[3,4],[5,6]])
-    B = np.ones((2,3))
-    res = add(A, B)
-    assert(res)
-
-
-
-
-
-    # torch case
+    # numpy float
+    A = np.array([[1,2],[3,4],[5,6]], dtype = np.float32)
+    B = np.ones((3,2), dtype = np.float32)
+    res = add(A, B, False)
+    assert(np.array_equal(res, np.array([[2,3],[4,5],[6,7]], dtype = np.float32)))
+    # torch float
+    A = torch.tensor([[1,2],[3,4],[5,6]], dtype = torch.float32, device = 'cuda')
+    B = torch.ones((3,2), dtype = torch.float32, device = 'cuda')
+    res = add(A, B, False)
+    assert(torch.equal(res, torch.tensor([[2,3],[4,5],[6,7]], dtype = torch.float32, device = 'cuda')))
+    # numpy interval case
+    A = np.array([Interval(1,2), Interval(3,4)], dtype= Interval)
+    B = np.array([Interval(0,1), Interval(5,6)], dtype= Interval)
+    res = add(A, B, True)
+    assert(res.dtype == object)
+    assert(np.array_equal(res, np.array([Interval(nextafter(1, -inf),nextafter(3, inf)), Interval(nextafter(8, -inf),nextafter(10, inf))], dtype=Interval)))
+    # torch interval test
+    A = torch.tensor([[1,2],[3,4]], dtype=torch.float32, device = 'cuda')
+    B = torch.zeros((2,2), dtype=torch.float32, device = 'cuda')
+    res = add(A,B,True)
+    assert(torch.equal(res, torch.tensor([[1,nextafter(2, inf)],[nextafter(3, -inf),nextafter(4, inf)]], dtype=torch.float32, device = 'cuda')))
     
 
 def gemm_non_interval_gpu():
@@ -134,3 +144,4 @@ if __name__ == '__main__':
     can_convert_numpy_Interval_array_to_upper()
     can_convert_numpy_Interval_array_to_lower()
     can_convert_torch_pseudo_interval_array_to_upper()
+    add_test()
