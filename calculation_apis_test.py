@@ -27,12 +27,7 @@ def can_convert_float_torch_array_to_pesudo_interval_array():
     b = torch_array_float2pinterval(a)
     assert(b.dtype == a.dtype)
     assert(b.device == a.device)
-    assert(b.shape[0] == a.shape[0])
-    assert(b.shape[1] == 2*a.shape[1])
-    assert(b[0,0] == 1 and b[0,1] == 1)
-    assert(b[0,2] == 2 and b[0,3] == 2)
-    assert(b[1,0] == 3 and b[1,1] == 3)
-    assert(b[1,2] == 4 and b[1,3] == 4)
+    assert(torch.equal(b, torch.tensor([[1,1,2,2],[3,3,4,4]], dtype = torch.float32, device = 'cuda')))
 
 
 def can_convert_numpy_Interval_array_to_upper():
@@ -43,11 +38,7 @@ def can_convert_numpy_Interval_array_to_upper():
     a = np.array([[Interval(1,1), Interval(1,2)], [Interval(1,3), Interval(1,4)]])
     b = get_upper(a)
     assert(b.dtype == np.float32)
-    assert(b.shape == a.shape)
-    assert(b[0,0] == 1)
-    assert(b[0,1] == 2)
-    assert(b[1,0] == 3)
-    assert(b[1,1] == 4)
+    assert(np.array_equal(b,np.array([[1,2],[3,4]], dtype = np.float32)))
     
 
 def can_convert_numpy_Interval_array_to_lower():
@@ -58,11 +49,7 @@ def can_convert_numpy_Interval_array_to_lower():
     a = np.array([[Interval(1,1), Interval(1,2)], [Interval(1,3), Interval(1,4)]])
     b = get_lower(a)
     assert(b.dtype == np.float32)
-    assert(b.shape == a.shape)
-    assert(b[0,0] == 1)
-    assert(b[0,1] == 1)
-    assert(b[1,0] == 1)
-    assert(b[1,1] == 1)
+    assert(np.array_equal(b,np.array([[1,1],[1,1]], dtype = np.float32)))
 
 
 def can_convert_torch_pseudo_interval_array_to_upper():
@@ -74,12 +61,7 @@ def can_convert_torch_pseudo_interval_array_to_upper():
     b = get_upper(a)
     assert(b.dtype == a.dtype)
     assert(b.device == a.device)
-    assert(b.shape[0] == a.shape[0])
-    assert(b.shape[1] == a.shape[1]//2)
-    assert(b[0,0] == 2)
-    assert(b[0,1] == 4)
-    assert(b[1,0] == 6)
-    assert(b[1,1] == 8)
+    assert(torch.equal(b,torch.tensor([[2,4],[6,8]], dtype = torch.float32, device='cuda')))
 
 
 def can_convert_torch_pseudo_interval_array_to_lower():
@@ -91,24 +73,22 @@ def can_convert_torch_pseudo_interval_array_to_lower():
     b = get_upper(a)
     assert(b.dtype == a.dtype)
     assert(b.device == a.device)
-    assert(b.shape[0] == a.shape[0])
-    assert(b.shape[1] == a.shape[1]//2)
-    assert(b[0,0] == 1)
-    assert(b[0,1] == 3)
-    assert(b[1,0] == 5)
-    assert(b[1,1] == 7)
+    assert(torch.equal(b,torch.tensor([[1,3],[5,7]], dtype = torch.float32, device='cuda')))
+
+
+def add_test():
+    # numpy float case
+    A = np.array([[1,2],[3,4],[5,6]])
+    B = np.ones((2,3))
+    res = add(A, B)
+    assert(res)
 
 
 
-def gemm_non_interval_cpu():
-    A = np.ones((2,3))
-    B = np.ones((3,2))
-    bias = np.ones((2,2))
-    dest = mat_mul(A, B, False, False)
-    assert(dest[0][0] == 3)
-    dest = gemm(A, B, bias,False, False)
-    assert(dest[0][0] == 4)
 
+
+    # torch case
+    
 
 def gemm_non_interval_gpu():
     A = np.ones((2,3))
