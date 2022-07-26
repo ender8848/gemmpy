@@ -37,7 +37,7 @@ def can_convert_float_torch_array_to_pesudo_interval_array():
 
 def can_convert_numpy_Interval_array_to_upper():
     """
-    test function get_upper
+    test function get_upper for numpy interval array
     """
     # numpy interval case
     a = np.array([[Interval(1,1), Interval(1,2)], [Interval(1,3), Interval(1,4)]])
@@ -52,21 +52,17 @@ def can_convert_numpy_Interval_array_to_upper():
 
 def can_convert_numpy_Interval_array_to_lower():
     """
-    test function get_lower
+    test function get_lower for numpy interval array
     """
     # numpy interval case
     a = np.array([[Interval(1,1), Interval(1,2)], [Interval(1,3), Interval(1,4)]])
     b = get_lower(a)
     assert(b.dtype == np.float32)
     assert(b.shape == a.shape)
+    assert(b[0,0] == 1)
+    assert(b[0,1] == 1)
+    assert(b[1,0] == 1)
     assert(b[1,1] == 1)
-    # numpy pesudo interval case
-    c = np.array([[1.0,1.1],[2.0,2.1]], dtype = np.float32)
-    d = get_lower(c)
-    assert(d.dtype == np.float32)
-    assert(d.shape[0] == c.shape[0])
-    assert(d.shape[1] == c.shape[1]//2)
-    assert(c[0,0] == d[0,0] and c[1,0] == d[1,0])
 
 def gemm_non_interval_cpu():
     A = np.ones((2,3))
@@ -120,3 +116,4 @@ if __name__ == '__main__':
     can_convert_real_numbered_np_array_to_Interval_np_array()
     can_convert_float_torch_array_to_pesudo_interval_array()
     can_convert_numpy_Interval_array_to_upper()
+    can_convert_numpy_Interval_array_to_lower()
