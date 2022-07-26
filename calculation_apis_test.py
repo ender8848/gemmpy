@@ -87,55 +87,45 @@ def add_test():
     B = torch.ones((3,2), dtype = torch.float32, device = 'cuda')
     res = add(A, B, False)
     assert(torch.equal(res, torch.tensor([[2,3],[4,5],[6,7]], dtype = torch.float32, device = 'cuda')))
-    # numpy interval case
+    # numpy interval
     A = np.array([Interval(1,2), Interval(3,4)], dtype= Interval)
     B = np.array([Interval(0,1), Interval(5,6)], dtype= Interval)
     res = add(A, B, True)
     assert(res.dtype == object)
     assert(np.array_equal(res, np.array([Interval(nextafter(1, -inf),nextafter(3, inf)), Interval(nextafter(8, -inf),nextafter(10, inf))], dtype=Interval)))
-    # torch interval test
+    # torch interval
     A = torch.tensor([[1,2],[3,4]], dtype=torch.float32, device = 'cuda')
     B = torch.zeros((2,2), dtype=torch.float32, device = 'cuda')
     res = add(A,B,True)
     assert(torch.equal(res, torch.tensor([[1,nextafter(2, inf)],[nextafter(3, -inf),nextafter(4, inf)]], dtype=torch.float32, device = 'cuda')))
     
 
-def gemm_non_interval_gpu():
-    A = np.ones((2,3))
-    B = np.ones((3,2))
-    bias = np.ones((2,2))
-    dest = mat_mul(A, B, False, True)
-    assert(dest[0][0] == 3)
-    dest = gemm(A, B, bias,False, True)
-    assert(dest[0][0] == 4)
+def mat_mul_test():
+    # numpy float
+    A = np.array([[1,2,3],[4,5,6]], dtype = np.float32)
+    B = np.ones((3,2), dtype = np.float32)
+    res = mat_mul(A, B, False)
+    assert(np.array_equal(res, np.array([[6,6],[15,15]], dtype = np.float32)))
+    # torch float
+    A = torch.tensor([[1,2,3],[4,5,6]], dtype = torch.float32, device='cuda')
+    B = torch.ones((3,2), dtype = torch.float32, device='cuda')
+    res = mat_mul(A, B, False)
+    assert(torch.equal(res, torch.tensor([[6,6],[15,15]], dtype = torch.float32, device='cuda')))
+    # numpy interval 
+    A = np.array([[Interval(1,2), Interval(-2,3)]], dtype= Interval)
+    B = np.array([[Interval(-3,4)], [Interval(5,6)]], dtype= Interval)
+    res = mat_mul(A, B, True) # should be around (-18,26)
+    assert(res.dtype == object)
+    assert(res[0][0].lower <= -18 and res[0][0].upper >= 26)
+    # torch interval
+    A = torch.tensor([[1,2,-2,3]], dtype= torch.float32, device = 'cuda')
+    B = torch.tensor([[-3,4], [5,6]], dtype= torch.float32, device='cuda')
+    res = mat_mul(A, B, True) # should be around (-18,26)
+    assert(res.dtype==torch.float32)
+    print(res.shape)
+    assert(res[0][0] <= -18 and res[0][1] >= 26)
 
-def gemm_interval_cpu():
-    A = np_array_float2interval(np.ones((2,3)))
-    B = np_array_float2interval(np.ones((3,2)))
-    bias = np_array_float2interval(np.ones((2,2)))
-    dest = mat_mul(A, B, True, False)
-    print(dest[0][0])
-    dest = gemm(A, B, bias, True, False)
-    print(dest[0][0])
 
-
-# This test fails because A and B created by this way is actually an np array of objects
-# and each has 48 bytes!
-# if their data is passed directly, then C function will not work!
-# either rewrite a new C func or recreate a data structure and pass to C function
-# # But it seems not teh reason as float size is 24 ...
-def gemm_interval_gpu():
-    A = torch_array_float2pinterval(np.ones((2,3)))
-    B = torch_array_float2pinterval(np.ones((3,2)))
-    bias = torch_array_float2pinterval(np.ones((2,2)))
-    ll = ctypes.cdll.LoadLibrary
-    lib = ll('./gemmc/gemmGPU.so')
-    dest = mat_mul(A, B, True, True, lib)
-    dest = np_array_pinterval2interval(dest)
-    print(dest[0][0])
-    dest = gemm(A, B, bias, True, True, lib)
-    dest = np_array_pinterval2interval(dest)
-    print(dest[0][0])
 
 
 if __name__ == '__main__':
@@ -145,3 +135,4 @@ if __name__ == '__main__':
     can_convert_numpy_Interval_array_to_lower()
     can_convert_torch_pseudo_interval_array_to_upper()
     add_test()
+    mat_mul_test()
