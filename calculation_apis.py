@@ -65,7 +65,7 @@ def get_upper(arr):
                 result[i,j] = arr[i,j].upper
         return result
     elif isinstance(arr, torch.Tensor):
-        result = torch.empty((arr.shape[0], arr.shape[1]//2), dtype = torch.float32)
+        result = torch.empty((arr.shape[0], arr.shape[1]//2), dtype = torch.float32, device=arr.device)
         for i in range(arr.shape[0]):
             for j in range(arr.shape[1]//2):
                 result[i,j] = arr[i,2*j+1]
@@ -90,7 +90,7 @@ def get_lower(arr):
                 result[i,j] = arr[i,j].lower
         return result
     elif isinstance(arr, torch.Tensor):
-        result = torch.empty((arr.shape[0], arr.shape[1]//2), dtype = torch.float32)
+        result = torch.empty((arr.shape[0], arr.shape[1]//2), dtype = torch.float32, device=arr.device)
         for i in range(arr.shape[0]):
             for j in range(arr.shape[1]//2):
                 result[i,j] = arr[i,2*j]
