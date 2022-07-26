@@ -1,36 +1,38 @@
 import numpy as np
-import cupy as cp
+import torch
 from calculation_apis import *
 from Interval import print_2d_array
+
 
 def can_convert_real_numbered_np_array_to_Interval_np_array():
     """
     test function np_array_float2interval
     """
-    a = np.ones((3,4))
+    a = np.array([[1,2],[3,4]], dtype = np.float32)
     b = np_array_float2interval(a)
     assert(b.dtype == object)
     assert(b.shape == a.shape)
     assert(b[0,0] == Interval(1,1))
+    assert(b[0,1] == Interval(2,2))
+    assert(b[1,0] == Interval(3,3))
+    assert(b[1,1] == Interval(4,4))
+
 
 def can_convert_float_array_to_pesudo_interval_array():
     """
-    test function array_float2pinterval
+    test function torch_array_float2pinterval
     """
-    # cpu case
-    a = np.eye(2)
+    # gpu case
+    a = torch.tensor([[1,2],[3,4]], dtype = torch.float32, device='cuda')
     b = torch_array_float2pinterval(a)
-    assert(b.dtype == np.float32)
+    assert(b.dtype == a.dtype)
+    assert(b.device == a.device)
     assert(b.shape[0] == a.shape[0])
     assert(b.shape[1] == 2*a.shape[1])
-    assert(b[0,0] == 1 and b[0,1] == 1 and b[0,2] == 0)
-    # gpu case
-    c = cp.eye(2)
-    d = torch_array_float2pinterval(c)
-    assert(d.dtype == cp.float32)
-    assert(d.shape[0] == c.shape[0])
-    assert(d.shape[1] == 2*c.shape[1])
-    assert(d[0,0] == 1 and d[0,1] == 1 and d[0,2] == 0)
+    assert(b[0,0] == 1 and b[0,1] == 1)
+    assert(b[0,2] == 2 and b[0,3] == 2)
+    assert(b[1,0] == 3 and b[1,1] == 3)
+    assert(b[1,2] == 4 and b[1,3] == 4)
 
 def can_convert_numpy_pesudo_interval_array_to_Interval_array():
     """
@@ -130,5 +132,3 @@ def gemm_interval_gpu():
 if __name__ == '__main__':
     can_convert_real_numbered_np_array_to_Interval_np_array()
     can_convert_float_array_to_pesudo_interval_array()
-    can_convert_numpy_pesudo_interval_array_to_Interval_array()
-    can_convert_numpy_Interval_array_to_upper()

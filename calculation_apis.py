@@ -40,7 +40,7 @@ def torch_array_float2pinterval(arr:torch.Tensor):
     """
     if not isinstance(arr, torch.Tensor):
         raise TypeError("arr must be torch tensor")
-    result = torch.zeros((arr.shape[0], arr.shape[1]*2), dtype = torch.float32)
+    result = torch.zeros((arr.shape[0], arr.shape[1]*2), dtype = torch.float32, device=arr.device)
 
     for i in range(arr.shape[0]):
         for j in range(arr.shape[1]):
