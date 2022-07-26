@@ -18,7 +18,7 @@ def can_convert_real_numbered_np_array_to_Interval_np_array():
     assert(b[1,1] == Interval(4,4))
 
 
-def can_convert_float_array_to_pesudo_interval_array():
+def can_convert_float_torch_array_to_pesudo_interval_array():
     """
     test function torch_array_float2pinterval
     """
@@ -34,16 +34,6 @@ def can_convert_float_array_to_pesudo_interval_array():
     assert(b[1,0] == 3 and b[1,1] == 3)
     assert(b[1,2] == 4 and b[1,3] == 4)
 
-def can_convert_numpy_pesudo_interval_array_to_Interval_array():
-    """
-    test function array_pinterval2interval
-    """
-    a = np.array([[1.0,1.1],[2.0,2.1]], dtype = np.float32)
-    b = np_array_pinterval2interval(a)
-    assert(b.dtype == object)
-    assert(b.shape[0] == a.shape[0])
-    assert(b.shape[1] == a.shape[1]//2)
-    assert(a[0,0] == b[0,0].lower and a[0,1] == b[0,0].upper)
 
 def can_convert_numpy_Interval_array_to_upper():
     """
@@ -54,14 +44,11 @@ def can_convert_numpy_Interval_array_to_upper():
     b = get_upper(a)
     assert(b.dtype == np.float32)
     assert(b.shape == a.shape)
+    assert(b[0,0] == 1)
+    assert(b[0,1] == 2)
+    assert(b[1,0] == 3)
     assert(b[1,1] == 4)
-    # numpy pesudo interval case
-    c = np.array([[1.0,1.1],[2.0,2.1]], dtype = np.float32)
-    d = get_upper(c)
-    assert(d.dtype == np.float32)
-    assert(d.shape[0] == c.shape[0])
-    assert(d.shape[1] == c.shape[1]//2)
-    assert(c[0,1] == d[0,0] and c[1,1] == d[1,0])
+    
 
 def can_convert_numpy_Interval_array_to_lower():
     """
@@ -131,4 +118,5 @@ def gemm_interval_gpu():
 
 if __name__ == '__main__':
     can_convert_real_numbered_np_array_to_Interval_np_array()
-    can_convert_float_array_to_pesudo_interval_array()
+    can_convert_float_torch_array_to_pesudo_interval_array()
+    can_convert_numpy_Interval_array_to_upper()
