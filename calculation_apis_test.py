@@ -72,7 +72,7 @@ def can_convert_torch_pseudo_interval_array_to_lower():
     """
     # torch pseudo interval case
     a = torch.tensor([[1,2,3,4], [5,6,7,8]], dtype = torch.float32, device='cuda')
-    b = get_upper(a)
+    b = get_lower(a)
     assert(b.dtype == a.dtype)
     assert(b.device == a.device)
     assert(torch.equal(b,torch.tensor([[1,3],[5,7]], dtype = torch.float32, device='cuda')))
@@ -221,7 +221,8 @@ if __name__ == '__main__':
     can_convert_numpy_Interval_array_to_upper()
     can_convert_numpy_Interval_array_to_lower()
     can_convert_torch_pseudo_interval_array_to_upper()
+    can_convert_torch_pseudo_interval_array_to_lower()
     add_test()
     mat_mul_test()
     gemm_test()
-    gemm_calculation_speed_test()
+    # gemm_calculation_speed_test()
