@@ -1,5 +1,5 @@
 # cuda-playground
-learn and test some CUDA functionalities
+not yet up-to-date
 
 # Prerequisite
 
