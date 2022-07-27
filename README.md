@@ -1,65 +1,25 @@
-# cuda-playground
-not yet up-to-date
+# gemmpy
 
-# Prerequisite
+gemm Python API for sound floating-point number calculation
 
-|required|version|
-|--------|-------|
-|GPU hardware||
-|PyTorch|compatible with CUDA|
-|CUDA|compatible with PyTorch|
+# environment setup
 
-A brief summary of CUDA and PyTorch installation
+gemmpy contains gemmc C API and supports GPU acceleration for custom Interval type based on cutlass. To setup GPU environment, please refer to the [gemmc documentation](https://github.com/ender8848/cuda-playground/tree/main/gemmc#readme) in ```gemmc``` folder. 
 
-1. check CUDA version on device using the following command
+# compile gemmc API into dynamic linking code
+
+Use the following command to create a new lib folder and compile dynamic linking code
 
 ```
-nvidia-smi
+cp -r gemmc/src gemmc/lib
+mv gemmc/lib/gemmGPU.cuh gemmc/lib/gemmGPU.cu
+nvcc -O3 -shared -Xcompiler -fPIC gemmc/lib/gemmGPU.cu -o /gemmGPU.so
+mv gemmc/lib/mma.cuh gemmc/lib/mma.cu
+nvcc -O3 -shared -Xcompiler -fPIC gemmc/lib/mma.cu -o mma.so
 ```
 
-or
+# run the test
 
 ```
-nvcc -V
-```
-
-If both works, remember the version of CUDA
-
-If only one of those works, consider adding some path to the environmental variable. 
-
-If neither works, then you may have to reinstall the CUDA driver (see steps later)
-
-2. Get PyTorch with specific version in this [link](https://pytorch.org/get-started/previous-versions/)
-
-If CUDA version matches one of the PyTorch requirements, then simply install PyTorch and skip step3, otherwise go to step3 and install CUDA. 
-
-3. CUDA installation
-
-If either CUDA is not installed or has an unmatched version, then go to this [link](https://developer.nvidia.com/cuda-toolkit-archive) to install CUDA. 
-
-# test cases
-
-## CPU and GPU matrix addition test
-
-CPU matrix addition is done in PyTorch and GPU matrix addition is done by calling function in dynamic linking library.
-
-1. Compile .cu file into .so file using nvcc
-
-```
-nvcc -O3 -shared -Xcompiler -fPIC sum_matrix.cu -o sum_matrix.so
-```
-
-2. execute the python script 
-
-Execute with specified size n, the script will perform a nXn matrix addition on CPU and GPU. Default size is 1024x1024
-
-```
-python MMASpeedTest.py [-o size]
-```
-
----
-just a backup
-
-```
-nvcc -O3 -shared -Xcompiler -fPIC gemmGPU.cu -o gemmGPU.so
+python calculation_apis_test.py
 ```
