@@ -6,8 +6,8 @@ import torch
 # use torch for gpu calculation
 
 # set dynamic linking llib here
-gemmlib = ctypes.CDLL('lib/gemmGPU.so')
-mmalib = ctypes.CDLL('lib/mma.so')
+gemmlib = ctypes.CDLL('gemmGPU.so')
+mmalib = ctypes.CDLL('mma.so')
 # better put argtype setting here
 
 
