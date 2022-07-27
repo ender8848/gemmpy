@@ -57,7 +57,7 @@ void gemmGPUCUsingGPUPtr(T* A_dev, T* B_dev, T* dest_dev, int M, int N, int K, T
 
     if (status != cutlass::Status::kSuccess) {
         printf("GEMM failed\n");
-        printf("status: %d\n", status);
+        printf("status: %d\n", static_cast<int>(status));
         printf("\n");
     }
 }

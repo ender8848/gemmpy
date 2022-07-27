@@ -13,7 +13,7 @@ Use the following command to create a new lib folder and compile dynamic linking
 ```
 cp -r gemmc/src gemmc/lib
 mv gemmc/lib/gemmGPU.cuh gemmc/lib/gemmGPU.cu
-nvcc -O3 -shared -Xcompiler -fPIC gemmc/lib/gemmGPU.cu -o /gemmGPU.so
+nvcc -O3 -shared -Xcompiler -fPIC gemmc/lib/gemmGPU.cu -o gemmGPU.so
 mv gemmc/lib/mma.cuh gemmc/lib/mma.cu
 nvcc -O3 -shared -Xcompiler -fPIC gemmc/lib/mma.cu -o mma.so
 ```
