@@ -82,3 +82,5 @@ make
 ```
 
 If the code compiles and executes successfully (with some print result), then the environment is all set up.
+
+You can use ```git clean -fXd``` to clean test and build artifacts.
