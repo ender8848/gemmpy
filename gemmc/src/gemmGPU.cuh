@@ -27,14 +27,14 @@ template<typename T>
 void gemmGPUCUsingGPUPtr(T* A_dev, T* B_dev, T* dest_dev, int M, int N, int K, T* bias_dev) {
     using Gemm = cutlass::gemm::device::Gemm<
             T,                                    // ElementA, namely type of A
-            cutlass::layout::RowMajor,         // LayoutA, column major means colum of A is contiguous in memory
+            cutlass::layout::RowMajor,            // LayoutA, column major means colum of A is contiguous in memory
             T,                                    // ElementB
-            cutlass::layout::RowMajor,         // LayoutB
+            cutlass::layout::RowMajor,            // LayoutB
             T,                                    // ElementOutput
-            cutlass::layout::RowMajor,         // LayoutOutput
+            cutlass::layout::RowMajor,            // LayoutOutput
             T,                                    // ElementAccumulator
-            cutlass::arch::OpClassSimt,           // tag indicating Tensor Cores, architecture-dependent
-            cutlass::arch::Sm61                   // tag indicating target GPU opcode class, architecture-dependent (61 for GTX 1060)
+            cutlass::arch::OpClassSimt,           // tag indicating GPU opcode class, architecture-dependent
+            cutlass::arch::Sm61                   // tag indicating GPU compute compatability, architecture-dependent
     >;
     Gemm gemm;
     cutlass::Status status;
