@@ -75,3 +75,15 @@ fabric.properties
 
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
+
+# lib file (should be created by user)
+lib/
+
+# cmake build files
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+
+# built executable test file
+CutlassTest*
