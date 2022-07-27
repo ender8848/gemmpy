@@ -6,6 +6,14 @@ gemm Python API for sound floating-point number calculation
 
 gemmpy contains gemmc C API and supports GPU acceleration for custom Interval type based on cutlass. To setup GPU environment, please refer to the [gemmc documentation](https://github.com/ender8848/cuda-playground/tree/main/gemmc#readme) in ```gemmc``` folder. 
 
+After setting GPU environment, the following are also required
+
+
+|required|version|
+|--------|-------|
+|Python|>=3.9|
+|pytorch|compatible with cudatoolkit version|
+
 # compile gemmc API into dynamic linking code
 
 Use the following command to create a new lib folder and compile dynamic linking code
